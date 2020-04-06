@@ -59,6 +59,14 @@ void bulkLineWrapper::setValue(int lineNum, int lineVal)
     }
 }
 
+void bulkLineWrapper::blink(int lineNum, int ms)
+{
+    setValue(lineNum, 1);
+    usleep(ms * (int)1e3);
+    setValue(lineNum, 0);
+    usleep(ms * (int)1e3);
+}
+
 void bulkLineWrapper::requestOutput()
 {
     int initValues[count] = {0};
@@ -110,10 +118,20 @@ std::shared_ptr<gpiod_line_event> bulkLineWrapper::readEvents(gpiod_line_bulk* e
             releaseResources();
             ERR("Line event read failed\n");
         }
-
-        int offset = gpiod_line_offset(line);
-        debug("Event: " + std::to_string(offset));
     }
 
     return events;
+}
+
+std::shared_ptr<gpiod_line_event> bulkLineWrapper::readEvent(int lineNum)
+{
+    std::shared_ptr<gpiod_line_event> event(new gpiod_line_event());
+    auto line = lines->lines[lineNum];
+    int val = gpiod_line_event_read(line, event.get());
+    if (val < 0) {
+        releaseResources();
+        ERR("Line event read failed\n");
+    }
+
+    return event;
 }

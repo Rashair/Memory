@@ -19,4 +19,5 @@ public:
     void switchSeq();
     const std::vector<int>& getCurrentSeq();
     bool pushButton(int num);
+    void endGame();
 };

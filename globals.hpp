@@ -7,7 +7,7 @@ namespace resources {
 extern bool isDebugOn;
 
 extern const char* consumer;
-extern const int bounceMsWait;
+extern int bounceMsWait;
 
 extern const char* chipName;
 extern gpiod_chip* chip;

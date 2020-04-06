@@ -5,7 +5,7 @@ namespace resources {
 bool isDebugOn = false;
 
 const char* consumer = "CON";
-const int bounceMsWait = 200;
+int bounceMsWait = 250;
 
 const char* chipName = "gpiochip1";
 gpiod_chip* chip;

@@ -2,6 +2,7 @@
 
 #include <iostream>
 #include <memory>
+#include <unistd.h>
 
 #include <gpiod.h>
 
@@ -25,6 +26,8 @@ public:
 
     void setValue(int lineNum, int value);
 
+    void blink(int lineNum, int ms);
+
     void requestOutput();
 
     void requestFallingEdgeEvents();
@@ -32,6 +35,8 @@ public:
     void requestBothEdgesEvents();
 
     std::shared_ptr<gpiod_line_bulk> waitForEvent(timespec* ts);
+
+    std::shared_ptr<gpiod_line_event> readEvent(int lineNum);
 
     std::shared_ptr<gpiod_line_event> readEvents(gpiod_line_bulk* eventLines);
 };

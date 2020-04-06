@@ -39,6 +39,10 @@ unique_ptr<unsigned> generateOffsets(int start, int count)
     return unique_ptr<unsigned>(result);
 }
 
+void endGame()
+{
+}
+
 void handleArgs(int argc, char* argv[])
 {
     int opt;
@@ -81,6 +85,18 @@ void handleArgs(int argc, char* argv[])
                 }
                 break;
             }
+            case 't': {
+                int val = strtol(optarg, nullptr, 10);
+                if (val <= 0 || errno == ERANGE) {
+                    err("Invalid argument: bounceTime=" + string(optarg));
+                    usage(argv[0]);
+                    errno = 0;
+                }
+                else {
+                    bounceMsWait = val;
+                }
+                break;
+            }
             case 'd': {
                 cout << "Debugging mode on.\n";
                 isDebugOn = true;
@@ -98,9 +114,9 @@ int main(int argc, char* argv[])
 {
     // ios::sync_with_stdio(false);
     cout << "\nRunning " << argv[0] << "\n-----\n";
-    cout << "Button-chip: " << chipName << ", Bounce-wait: " << bounceMsWait << "\n";
     handleArgs(argc, argv);
-    cout << "Buttons-start: " << buttonsStart << ", Buttons-count: " << buttonsCount << "\n";
+    cout << "Button-chip: " << chipName << ", Bounce-wait: " << bounceMsWait << "\n";
+    cout << "Buttons-start: " << buttonsStart << ", Diodes-start: " << diodesStart << ", Buttons-count: " << buttonsCount << "\n";
     cout << "Debugging mode: " << (isDebugOn ? "true" : "false") << "\n";
     cout << "-----\n\n";
 
@@ -129,10 +145,7 @@ int main(int argc, char* argv[])
         if (!diodesHighlighted) {
             auto currSeq = memo->getCurrentSeq();
             for (int i = 0; i < memo->count(); ++i) {
-                diodes.setValue(currSeq[i], 1);
-                usleep(12 * (int)1e5);
-                diodes.setValue(currSeq[i], 0);
-                usleep(8 * (int)1e5);
+                diodes.blink(currSeq[i], 650);
             }
             pushCount = 0;
             diodesHighlighted = true;
@@ -151,28 +164,28 @@ int main(int argc, char* argv[])
             currentWait = &timeWait;
             continue;
         }
-        else if (currentWait == &timeBounce && pushCount != 0) {
+        else if (currentWait == &timeBounce) {
             buttons.readEvents(events.get());
             continue;
         }
 
         buttons.readEvents(events.get());
         auto buttNum = gpiod_line_offset(events->lines[0]) - buttonsStart;
-        cout << "Get event notification on button #" << buttNum << "\n";
+        cout << "Clicked button #" << buttNum << "\n";
         if (memo->pushButton(buttNum)) {
             ++pushCount;
         }
         else {
-            cout << "You lost. Final score: " << memo->count() << "\n";
+            memo->endGame();
+            for (int i = 0; i < 5; ++i) {
+                diodes.blink(diodesHighlighted, 500);
+            }
             break;
         }
         currentWait = &timeBounce;
     }
 
     releaseResources();
-    cout << "Don't worry. Everyone loses. In the end, all men die.\n"
-         << "Failure is preferable to winning through unjust means. \n"
-            "How you lived is far more important than what you accomplished. \n";
 
     return 0;
 }

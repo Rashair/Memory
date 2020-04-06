@@ -10,7 +10,7 @@ void err(std::string message)
 
 void usage(std::string progName)
 {
-    err("USAGE:" + progName + " [-d -b buttonsStart -c buttonsCount -i diodesStart]");
+    err("USAGE:" + progName + " [-d -b buttonsStart -c buttonsCount -i diodesStart -t bounceTime (ms)]");
 }
 
 void debug(std::string message)

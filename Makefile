@@ -1,6 +1,6 @@
 CC=$(CROSS_COMPILE)g++
 CFLAGS=-std=c++17 -Wall
-OBJS := main.o globals.o memory.o bulkLineWrapper.o lineWrapper.o utility.o
+OBJS := main.o globals.o memory.o bulkLineWrapper.o utility.o
 LIBS=-lgpiod
 all: main
 main: $(OBJS)

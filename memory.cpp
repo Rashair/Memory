@@ -1,3 +1,4 @@
+#include <iostream>
 #include <string>
 
 #include "memory.hpp"
@@ -56,4 +57,13 @@ bool memory::pushButton(int num)
 
     currButton = 0;
     return false;
+}
+
+void memory::endGame()
+{
+    std::cout << "--\n";
+    std::cout << "You lost. Final score: " << count() << "\n";
+    std::cout << "Don't worry. Everyone loses. In the end, all men die.\n"
+              << "Failure is preferable to winning through unjust means. \n"
+                 "How you lived is far more important than what you accomplished. \n";
 }
