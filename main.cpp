@@ -8,6 +8,7 @@
 
 #include "bulkLineWrapper.hpp"
 #include "globals.hpp"
+#include "memory.hpp"
 #include "utility.hpp"
 
 using namespace std;
@@ -15,8 +16,7 @@ using namespace resources;
 
 void releaseResources()
 {
-    gpiod_line_release_bulk(buttons);
-    gpiod_chip_close(buttonChip);
+    gpiod_chip_close(chip);
 }
 
 gpiod_chip* getChipByName(const char* cName)
@@ -27,6 +27,16 @@ gpiod_chip* getChipByName(const char* cName)
     }
 
     return chip;
+}
+
+unique_ptr<unsigned> generateOffsets(int start, int count)
+{
+    auto result = new unsigned[count];
+    for (int i = 0; i < count; ++i) {
+        result[i] = start + i;
+    }
+
+    return unique_ptr<unsigned>(result);
 }
 
 void handleArgs(int argc, char* argv[])
@@ -88,42 +98,81 @@ int main(int argc, char* argv[])
 {
     // ios::sync_with_stdio(false);
     cout << "\nRunning " << argv[0] << "\n-----\n";
-    cout << "Button-chip: " << bName << ", Bounce-wait: " << bounceMsWait << "\n";
+    cout << "Button-chip: " << chipName << ", Bounce-wait: " << bounceMsWait << "\n";
     handleArgs(argc, argv);
     cout << "Buttons-start: " << buttonsStart << ", Buttons-count: " << buttonsCount << "\n";
     cout << "Debugging mode: " << (isDebugOn ? "true" : "false") << "\n";
     cout << "-----\n\n";
 
-    buttonChip = getChipByName(bName);
-    unique_ptr<unsigned> offsets(new unsigned[buttonsCount]);
-    for (int i = 0; i < buttonsCount; ++i) {
-        offsets.get()[i] = buttonsStart + i;
-    }
-    bulkLineWrapper lines(buttonChip, offsets.get(), buttonsCount, &releaseResources);
-    lines.requestFallingEdgeEvents();
+    chip = getChipByName(chipName);
 
-    timespec timeWait = {2, 0};
+    auto buttOffsets = generateOffsets(buttonsStart, buttonsCount);
+    bulkLineWrapper buttons(chip, buttOffsets.get(), buttonsCount, &releaseResources);
+    debug("Prepared button lines");
+
+    auto diodOffsets = generateOffsets(diodesStart, diodesCount);
+    bulkLineWrapper diodes(chip, diodOffsets.get(), diodesCount, &releaseResources);
+    debug("Prepared diode lines");
+
+    auto memo = unique_ptr<memory>(new memory(buttonsCount));
+    int pushCount = 0;
+    bool diodesHighlighted = false;
+    timespec timeWait = {3, 0};
     timespec timeBounce = {0, bounceMsWait * (int)1e6};
-    timespec* ts = &timeWait;
+    timespec* currentWait = &timeWait;
+
+    sleep(3);
+
+    buttons.requestFallingEdgeEvents();
+    diodes.requestOutput();
     while (true) {
-        auto events = lines.waitForEvent(ts);
-        if (events == nullptr) {
-            ts = &timeWait;
-            debug("Timeout!");
+        if (!diodesHighlighted) {
+            auto currSeq = memo->getCurrentSeq();
+            for (int i = 0; i < memo->count(); ++i) {
+                diodes.setValue(currSeq[i], 1);
+                usleep(12 * (int)1e5);
+                diodes.setValue(currSeq[i], 0);
+                usleep(8 * (int)1e5);
+            }
+            pushCount = 0;
+            diodesHighlighted = true;
             continue;
         }
-        else if (ts == &timeBounce) {
-            lines.readEvents(events.get());
+        else if (pushCount == memo->count()) {
+            memo->switchSeq();
+            diodesHighlighted = false;
+            sleep(1);
             continue;
         }
 
-        lines.readEvents(events.get());
-        auto lineNum = gpiod_line_offset(events->lines[0]);
-        debug("Get event notification on line #" + to_string(lineNum));
-        ts = &timeBounce;
+        // Handle push
+        auto events = buttons.waitForEvent(currentWait);
+        if (events == nullptr) {
+            currentWait = &timeWait;
+            continue;
+        }
+        else if (currentWait == &timeBounce && pushCount != 0) {
+            buttons.readEvents(events.get());
+            continue;
+        }
+
+        buttons.readEvents(events.get());
+        auto buttNum = gpiod_line_offset(events->lines[0]) - buttonsStart;
+        cout << "Get event notification on button #" << buttNum << "\n";
+        if (memo->pushButton(buttNum)) {
+            ++pushCount;
+        }
+        else {
+            cout << "You lost. Final score: " << memo->count() << "\n";
+            break;
+        }
+        currentWait = &timeBounce;
     }
 
     releaseResources();
+    cout << "Don't worry. Everyone loses. In the end, all men die.\n"
+         << "Failure is preferable to winning through unjust means. \n"
+            "How you lived is far more important than what you accomplished. \n";
 
     return 0;
 }

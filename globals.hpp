@@ -9,13 +9,14 @@ extern bool isDebugOn;
 extern const char* consumer;
 extern const int bounceMsWait;
 
-extern const char* bName;
-extern gpiod_chip* buttonChip;
-extern int buttonsCount;
+extern const char* chipName;
+extern gpiod_chip* chip;
+
 extern int buttonsStart;
-extern gpiod_line_bulk* buttons;
+extern int buttonsCount;
 
 extern int diodesStart;
+extern int diodesCount;
 
 } // namespace resources
 
