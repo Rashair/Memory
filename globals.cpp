@@ -6,6 +6,7 @@ bool isDebugOn = false;
 
 const char* consumer = "CON";
 int bounceMsWait = 250;
+int diodesBlink = 650;
 
 const char* chipName = "gpiochip1";
 gpiod_chip* chip;

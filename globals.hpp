@@ -8,6 +8,7 @@ extern bool isDebugOn;
 
 extern const char* consumer;
 extern int bounceMsWait;
+extern int diodesBlink;
 
 extern const char* chipName;
 extern gpiod_chip* chip;

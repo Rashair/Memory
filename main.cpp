@@ -97,6 +97,17 @@ void handleArgs(int argc, char* argv[])
                 }
                 break;
             }
+            case 'x': {
+                int val = strtol(optarg, nullptr, 10);
+                if (val <= 0 || errno == ERANGE) {
+                    err("Invalid argument: bounceTime=" + string(optarg));
+                    usage(argv[0]);
+                    errno = 0;
+                }
+                else {
+                    diodesBlink = val;
+                }
+            }
             case 'd': {
                 cout << "Debugging mode on.\n";
                 isDebugOn = true;
@@ -137,7 +148,9 @@ int main(int argc, char* argv[])
     timespec timeBounce = {0, bounceMsWait * (int)1e6};
     timespec* currentWait = &timeWait;
 
-    sleep(3);
+    std::cout << "Press any key to start...\n";
+    std::cin.get();
+    sleep(1);
 
     buttons.requestFallingEdgeEvents();
     diodes.requestOutput();
@@ -145,7 +158,7 @@ int main(int argc, char* argv[])
         if (!diodesHighlighted) {
             auto currSeq = memo->getCurrentSeq();
             for (int i = 0; i < memo->count(); ++i) {
-                diodes.blink(currSeq[i], 650);
+                diodes.blink(currSeq[i], diodesBlink);
             }
             pushCount = 0;
             diodesHighlighted = true;
