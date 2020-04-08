@@ -39,10 +39,6 @@ unique_ptr<unsigned> generateOffsets(int start, int count)
     return unique_ptr<unsigned>(result);
 }
 
-void endGame()
-{
-}
-
 void handleArgs(int argc, char* argv[])
 {
     int opt;
