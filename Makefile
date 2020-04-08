@@ -1,13 +1,13 @@
-CC=$(CROSS_COMPILE)g++
-CFLAGS=-std=c++17 -Wall
+CXX=$(CROSS_COMPILE)g++
+CXXFLAGS=-std=c++17 -Wall
 OBJS := main.o globals.o memory.o bulkLineWrapper.o utility.o
 LIBS=-lgpiod
 memory-game: main
 main: $(OBJS)
-		$(CC) $(LIBS) -o memory-game $(CFLAGS) $(LDFLAGS) $(OBJS)
+		$(CXX) $(LIBS) -o memory-game $(CXXFLAGS) $(LDFLAGS) $(OBJS)
 $(OBJS)	:	%.o : %.cpp
-		$(CC) $(LIBS) -c $(CFLAGS) $< -o $@
+		$(CXX) $(LIBS) -c $(CXXFLAGS) $< -o $@
 
 .PHONY: clean all
 clean:
-	rm main $(OBJS)
+	rm memory-game $(OBJS)
