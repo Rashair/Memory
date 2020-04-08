@@ -1,6 +1,3 @@
-# Prerequisites
-*.d
-
 # Compiled Object files
 *.slo
 *.lo
@@ -31,11 +28,6 @@
 
 # Custom
 libgpiod/
-main
-.*
+.token.git
 memory-game
 
-
-Ai
-
-.*

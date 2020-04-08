@@ -1,0 +1,11 @@
+config BR2_PACKAGE_MEMORY_GAME
+	bool "memory-game"
+	depends on BR2_PACKAGE_LIBGPIOD
+	help
+	  Memory-game with use of three buttons and four diodes. 
+	  There are 2 simultaneous sequences. 
+	  Each one is repeated alternately with blinks of diodes.
+	  You loose when you make a mistake in repeating sequence
+	  with buttons.
+	comment "Memory-game needs libgpiod to be installed"
+	depends on !BR2_PACKAGE_LIBGPIOD
