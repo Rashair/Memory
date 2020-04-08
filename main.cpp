@@ -82,6 +82,7 @@ void handleArgs(int argc, char* argv[])
                 }
                 else {
                     buttonsCount = val;
+                    diodesCount = val + 1;
                 }
                 break;
             }
@@ -115,7 +116,6 @@ void handleArgs(int argc, char* argv[])
                 break;
             }
             case '?':
-                err("Invalid argument");
                 usage(argv[0]);
                 break;
         }
