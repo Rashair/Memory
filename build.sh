@@ -1,4 +1,4 @@
 (
     export PATH=$BRPATH/output/host/usr/bin:$PATH
-    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- main
+    make ARCH=arm CROSS_COMPILE=arm-none-linux-gnueabihf- memory-game
 )
