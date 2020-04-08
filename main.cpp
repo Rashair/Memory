@@ -107,6 +107,7 @@ void handleArgs(int argc, char* argv[])
                 else {
                     diodesBlink = val;
                 }
+                break;
             }
             case 'd': {
                 cout << "Debugging mode on.\n";
@@ -191,7 +192,7 @@ int main(int argc, char* argv[])
         else {
             memo->endGame();
             for (int i = 0; i < 5; ++i) {
-                diodes.blink(diodesHighlighted, 500);
+                diodes.blink(diodesCount - 1, 500);
             }
             break;
         }
